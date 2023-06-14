@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <cmath>
 
 namespace Parsing{
 
@@ -85,54 +86,54 @@ namespace Parsing{
             std::vector<std::string> output;
         public:
             bool is_empty(){
-            return stack.size() == 0;
-        }
+                return stack.size() == 0;
+            }
 
-        void push_stack(std::string str){
-            if(str.length() == 0){
-                throw std::invalid_argument("Empty string passed to shunting yard algorithm\n");
-            }if(is_operator(str.back())){
-                while(!is_empty() && is_operator(stack.back()[0]) && 
-                            (
-                                (op_prec(stack.back()) > op_prec(str)) || 
-                                (op_prec(stack.back()) >= op_prec(str) && !right_associate(str))
-                            )){
+            void push_stack(std::string str){
+                if(str.length() == 0){
+                    throw std::invalid_argument("Empty string passed to shunting yard algorithm\n");
+                }if(is_operator(str.back())){
+                    while(!is_empty() && is_operator(stack.back()[0]) && 
+                                (
+                                    (op_prec(stack.back()) > op_prec(str)) || 
+                                    (op_prec(stack.back()) >= op_prec(str) && !right_associate(str))
+                                )){
+                        output.push_back(stack.back());
+                        stack.pop_back();
+                    }
+                    stack.push_back(str);
+                    return;
+                }if(is_bracket(str[0])){
+                    switch(str[0]){
+
+                        case '(':
+                            stack.push_back(str);
+                            return;
+
+                        case ')':
+                            while(stack.back() != "("){
+
+                                if(is_empty())
+                                    throw std::invalid_argument("Mismatched brackets");
+                                output.push_back(stack.back());
+                                stack.pop_back();
+
+                            }
+                            stack.pop_back();
+
+                    }
+                    return;
+                }
+                output.push_back(str);
+            }
+
+            std::vector<std::string> result(){
+                while(!is_empty()){
                     output.push_back(stack.back());
                     stack.pop_back();
                 }
-                stack.push_back(str);
-                return;
-            }if(is_bracket(str[0])){
-                switch(str[0]){
-
-                    case '(':
-                        stack.push_back(str);
-                        return;
-
-                    case ')':
-                        while(stack.back() != "("){
-
-                            if(is_empty())
-                                throw std::invalid_argument("Mismatched brackets");
-                            output.push_back(stack.back());
-                            stack.pop_back();
-
-                        }
-                        stack.pop_back();
-
-                }
-                return;
+                return output;
             }
-            output.push_back(str);
-        }
-
-        std::vector<std::string> result(){
-            while(!is_empty()){
-                output.push_back(stack.back());
-                stack.pop_back();
-            }
-            return output;
-        }
 
     };
 
@@ -165,14 +166,14 @@ namespace Parsing{
                         retval.push_back(temp_rat);
                     }
                     else {
-                        T temp_rat(std::stoi(*it), 1);
+                        T temp_rat = (T)std::stoi(*it);
                         retval.push_back(temp_rat);
                     }
                 else if(retval.size() >= 2){ 
 
                     switch((*it)[0]){
                         case '^':
-                            retval[retval.size() - 2] = T(std::pow(retval[retval.size() - 2].approx(), retval.back().approx()));
+                            retval[retval.size() - 2] = T(std::pow(retval[retval.size() - 2], retval.back()));
                             retval.pop_back();
                             break;
                         case '/':
