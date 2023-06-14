@@ -1,5 +1,9 @@
 # Prerequisites
 *.d
+
+test
+CMakeLists.txt
+test.dSYM/
 .vscode/
 test.cpp
 build/
