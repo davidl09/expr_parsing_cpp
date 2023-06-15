@@ -158,8 +158,9 @@ namespace Parsing{
 
         void evaluate(){
             std::vector<T> retval;
-
+            using std::pow;
             for(auto it = out.begin(); it != out.end(); ++it){
+
                 if(!is_operator((*it).back())) //evaluate last element since unary minus would break this
                     if(str_charcount(*it, '.') == 1){
                         T temp_rat(std::stod(*it));
@@ -169,11 +170,11 @@ namespace Parsing{
                         T temp_rat = (T)std::stoi(*it);
                         retval.push_back(temp_rat);
                     }
-                else if(retval.size() >= 2){ 
 
+                else if(retval.size() > 1){ 
                     switch((*it)[0]){
                         case '^':
-                            retval[retval.size() - 2] = T(std::pow(retval[retval.size() - 2], retval.back()));
+                            retval[retval.size() - 2] = T(pow(retval[retval.size() - 2], retval.back()));
                             retval.pop_back();
                             break;
                         case '/':
@@ -196,7 +197,9 @@ namespace Parsing{
                             throw std::invalid_argument("Unknown symbol encountered\n");
                     }
 
-                }else{
+                }
+                
+                else{
                     throw std::invalid_argument("Misformed expression, parsing failed\n");
                 }
             }   
