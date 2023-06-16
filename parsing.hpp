@@ -199,11 +199,13 @@ namespace Parsing{
                     }
 
                 }
-                
                 else{
                     throw std::invalid_argument("Misformed expression, parsing failed\n");
                 }
             }   
+            if(retval.size() == 0){
+                throw std::invalid_argument("Empty expression\n");
+            }
             value = retval[0];
         }
 
