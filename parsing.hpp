@@ -1,3 +1,6 @@
+#ifndef PARSING_HPP
+#define PARSING_HPP
+
 #include <string>
 #include <vector>
 #include <cmath>
@@ -303,3 +306,5 @@ namespace Parsing{
     }
     
 }
+
+#endif
