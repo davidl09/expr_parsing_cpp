@@ -5,7 +5,7 @@ test
 CMakeLists.txt
 test.dSYM/
 .vscode/
-test.cpp
+
 build/
 *.txt
 # Compiled Object files

@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <stdexcept>
 
 namespace Parsing{
 
@@ -293,7 +294,7 @@ namespace Parsing{
     };
 
     template<typename T>
-    T str_to_rational(const std::string& str){
+    T parse_mstring(const std::string& str){
         ShuntingYard<T> shunt(str);
         shunt.compute();
         return shunt.getResult();
