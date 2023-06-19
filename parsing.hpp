@@ -56,6 +56,13 @@ namespace Parsing{
         return r_associate.find(str) != std::string::npos;
     }
     
+    bool is_mfunc(std::string& expr){
+        if(m_funcs_pre.find(expr[0] == std::string::npos)) return false;
+        for(auto& pre : m_funcs){
+            
+        }
+    }
+    
     #define isalpha(a) ((a >= 'a' && a <= 'z') || (a >= 'A' && a <= 'Z'))
 
     int op_prec(std::string str){ //numbers: 0, +-: 1,  */: 2, ^: 3
@@ -70,6 +77,8 @@ namespace Parsing{
                 if(is_bracket(str[0]))
                     return 0;
             default:
+                if(m_funcs_pre.find(str[0] != std::string::npos))
+                    return 1;
                 for(char& c : str){
                     if(nums.find(c) != std::string::npos)
                         return 0;
@@ -89,16 +98,6 @@ namespace Parsing{
     }
     
     class Tokenizer{
-        private:
-        
-        bool is_mfunc(std::string& expr){
-            for(auto& f : m_funcs){
-                if(f == expr) return true;
-            }
-            return false;
-        }
-        
-        
         public:
         
         std::vector<std::string> tokenize(std::string expr){
@@ -150,8 +149,9 @@ namespace Parsing{
                     out.push_back(temp);
                     temp.erase();
                     continue;
+                }else{
+                    
                 }
-                
             }
             return out;
         }
@@ -374,7 +374,8 @@ namespace Parsing{
         shunt.compute();
         return shunt.getResult();
     }
-
+    
+    
 }
 
 #endif
