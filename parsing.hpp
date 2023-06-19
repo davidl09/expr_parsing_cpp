@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <stdexcept>
+#include <cassert>
 
 namespace Parsing{
 
@@ -13,6 +14,8 @@ namespace Parsing{
     const std::string nums = "0123456789.";
     const std::string symbols("0123456789+-*/^.()");
     const std::string r_associate("^");
+    const std::vector<std::string> m_funcs({"sin", "cos", "tan", "exp", "sqrt", "asin", "acos", "atan"});
+    const std::string m_funcs_pre("sctea");
 
 
     size_t match_bracket(std::string& str, size_t index){ //assumes bracket parity is given
@@ -52,6 +55,8 @@ namespace Parsing{
     bool right_associate(std::string& str){
         return r_associate.find(str) != std::string::npos;
     }
+    
+    #define isalpha(a) ((a >= 'a' && a <= 'z') || (a >= 'A' && a <= 'Z'))
 
     int op_prec(std::string str){ //numbers: 0, +-: 1,  */: 2, ^: 3
         switch (str.length()) {
@@ -82,62 +87,131 @@ namespace Parsing{
         }
         return count;
     }
-
-        class ShuntingStack{
-
+    
+    class Tokenizer{
         private:
-            std::vector<std::string> stack;
-            std::vector<std::string> output;
+        
+        bool is_mfunc(std::string& expr){
+            for(auto& f : m_funcs){
+                if(f == expr) return true;
+            }
+            return false;
+        }
+        
+        
         public:
-            bool is_empty(){
-                return stack.size() == 0;
-            }
-
-            void push_stack(std::string str){
-                if(str.length() == 0){
-                    throw std::invalid_argument("Empty string passed to shunting yard algorithm\n");
-                }if(is_operator(str.back())){
-                    while(!is_empty() && is_operator(stack.back()[0]) && 
-                                (
-                                    (op_prec(stack.back()) > op_prec(str)) || 
-                                    (op_prec(stack.back()) >= op_prec(str) && !right_associate(str))
-                                )){
-                        output.push_back(stack.back());
-                        stack.pop_back();
+        
+        std::vector<std::string> tokenize(std::string expr){
+            if(expr.length() == 0)
+                throw std::invalid_argument("Empty string passed to tokenizer\n");
+                
+            auto i = expr.begin();
+            std::string temp;
+            
+            std::vector<std::string> out;
+            out.reserve(expr.length());
+            
+            while(i != expr.end()){
+                if(is_numchar(*i)){
+                    while(is_numchar(*i)){
+                        temp.push_back(*i++);
                     }
-                    stack.push_back(str);
-                    return;
-                }if(is_bracket(str[0])){
-                    switch(str[0]){
-
-                        case '(':
-                            stack.push_back(str);
-                            return;
-
-                        case ')':
-                            while(stack.back() != "("){
-
-                                if(is_empty())
-                                    throw std::invalid_argument("Mismatched brackets");
-                                output.push_back(stack.back());
-                                stack.pop_back();
-
-                            }
-                            stack.pop_back();
-
-                    }
-                    return;
+                    out.push_back(temp);
+                    temp.erase();
+                    continue;
                 }
-                output.push_back(str);
+                if(is_operator(*i)){
+                    if(*i == '-' && (i == expr.begin() || is_operator(*(i-1))) && (i != expr.end() - 1 && is_numchar(*(i+1)))){
+                        //if it's a unary minus
+                        temp.push_back('-');
+                        i++;
+                        continue;
+                    }else{
+                        assert(temp.length() == 0);
+                        temp.push_back(*i++);
+                        out.push_back(temp);
+                        temp.erase();
+                        continue;
+                    }
+                }
+                if(m_funcs_pre.find(*i) != std::string::npos){
+                    while(isalpha(*i)){
+                        temp.push_back(*i++);
+                    }
+                    assert(is_bracket(*i));
+                    temp.push_back(*i++);
+                    out.push_back(temp);
+                    temp.erase();
+                    continue;
+                }
+                if(is_bracket(*i)){
+                    assert(temp.length() == 0);
+                    temp.push_back(*i++);
+                    out.push_back(temp);
+                    temp.erase();
+                    continue;
+                }
+                
             }
+            return out;
+        }
+    };
 
-            std::vector<std::string> result(){
-                while(!is_empty()){
+    class ShuntingStack{
+
+    private:
+        std::vector<std::string> stack;
+        std::vector<std::string> output;
+    public:
+        bool is_empty(){
+            return stack.size() == 0;
+        }
+
+        void push_stack(std::string str){
+            if(str.length() == 0){
+                throw std::invalid_argument("Empty string passed to shunting yard algorithm\n");
+            }if(is_operator(str.back())){
+                while(!is_empty() && is_operator(stack.back()[0]) && 
+                            (
+                                (op_prec(stack.back()) > op_prec(str)) || 
+                                (op_prec(stack.back()) >= op_prec(str) && !right_associate(str))
+                            )){
                     output.push_back(stack.back());
                     stack.pop_back();
                 }
-                return output;
+                stack.push_back(str);
+                return;
+            }if(is_bracket(str[0])){
+                switch(str[0]){
+
+                    case '(':
+                        stack.push_back(str);
+                        return;
+
+                    case ')':
+                        while(stack.back() != "("){
+
+                            if(is_empty())
+                                throw std::invalid_argument("Mismatched brackets");
+                            output.push_back(stack.back());
+                            stack.pop_back();
+
+                        }
+                        stack.pop_back();
+
+                }
+                return;
             }
+            output.push_back(str);
+        }
+
+        std::vector<std::string> result(){
+            while(!is_empty()){
+                output.push_back(stack.back());
+                stack.pop_back();
+            }
+            return output;
+        }
 
     };
 
@@ -258,10 +332,6 @@ namespace Parsing{
                 }
             }
         }
-
-
-        
-
         
         bool is_valid_mstr(std::string& str){
             //check validity
@@ -297,14 +367,14 @@ namespace Parsing{
             return value.approx();
         }
     };
-
+    
     template<typename T>
     T parse_mstring(const std::string& str){
         ShuntingYard<T> shunt(str);
         shunt.compute();
         return shunt.getResult();
     }
-    
+
 }
 
 #endif
