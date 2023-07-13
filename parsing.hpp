@@ -25,7 +25,7 @@ namespace Parsing{
         "log(",
         "log2(",
         "ln("
-    }
+    };
     
     const std::vector<std::string> basic_operators = 
     {
@@ -34,7 +34,7 @@ namespace Parsing{
         "*",
         "/",
         "^",
-    }
+    };
     
     class Token{
         private:
@@ -43,9 +43,9 @@ namespace Parsing{
         public:
             Token(std::string value) : self(value) 
             {
-                for (char& it : self)
+                for (auto& it : self)
                 {
-                    if(!is_valid_char(it)) throw std::invalid_argument("Invalid character detected: \' " + it + " \'\n");
+                    if(!is_valid_char(it)) throw std::invalid_argument("Invalid character detected");
                 }
             }
             
@@ -54,14 +54,14 @@ namespace Parsing{
                 return self;
             }
             
-            static constexpr bool is_valid_char(char& c)
+            static constexpr bool is_valid_char(const char& c)
             {
-                return (c <= '9' && c >= '0') || (c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A') || c == '.' || c == '^' || c == '(' || c == ')'
+                return (c <= '9' && c >= '0') || (c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A') || c == '.' || c == '^' || c == '(' || c == ')';
             }
             
             constexpr bool is_numerical()
             {
-                for (char& it : self)
+                for (auto& it : self)
                 {
                     if((it > '9' || it < '0') && it != '.') return false;
                 }
@@ -106,17 +106,17 @@ namespace Parsing{
             
             constexpr bool is_any_bracket()
             {
-                return self == '(' || self == ')';
+                return self == "(" || self == ")";
             }
             
             constexpr bool is_r_bracket()
             {
-                return self == ')';
+                return self == ")";
             }
             
             constexpr bool is_l_bracket()
             {
-                return self == '(';
+                return self == "(";
             }
             
             static constexpr bool is_any_bracket(char& self)
