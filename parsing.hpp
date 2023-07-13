@@ -133,6 +133,25 @@ namespace Parsing{
             {
                 return self == '(';
             }
+
+            std::vector<Token> tokenize(std::string expression)
+            {
+                std::string temp;
+                std::vector<std::string> out;
+
+                std::reverse(expression.begin(), expression.end());
+                auto it = expression.begin();
+                while(it != expression.end())
+                {
+                    temp.push_back(*it);
+                    if(is_r_bracket(*it))
+                    {
+                        out.push_back(temp);
+                        temp.erase();
+                        ++it;
+                    }
+                }
+            }
     };
     
     template<typename T>
@@ -144,14 +163,7 @@ namespace Parsing{
         public:
             Expression(std::string expr)
             {
-                std::vector<string>
-                for (int i = 0; i < expr.length(); ++i)
-                {
-                    if(is_basic_operator(expr[i]))
-                    {
-                        switch
-                    }
-                }
+
             }
     };
     
