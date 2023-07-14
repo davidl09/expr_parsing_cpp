@@ -51,7 +51,7 @@ namespace Parsing{
                 }
             }
             
-            constexpr const std::string& val()
+            const std::string& val()
             {
                 return self;
             }
@@ -61,12 +61,12 @@ namespace Parsing{
                 return (c <= '9' && c >= '0') || (c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A') || c == '.' || c == '^' || c == '(' || c == ')';
             }
 
-            static constexpr bool is_alpha(const char& c)
+            static bool is_alpha(const char& c)
             {
                 return (c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A');
             }
             
-            constexpr bool is_numerical()
+            bool is_numerical()
             {
                 for (auto& it : self)
                 {
@@ -75,12 +75,12 @@ namespace Parsing{
                 return true;
             }
 
-            static constexpr bool is_numerical(const char& c)
+            static bool is_numerical(const char& c)
             {
                 return (c <= '9' && c >= '0') || c == '.';
             }
             
-            constexpr bool is_operator()
+            bool is_operator()
             {
                 for(auto& op : operators)
                 {
@@ -89,7 +89,7 @@ namespace Parsing{
                 return false;
             }
             
-            static constexpr bool is_operator(std::string& self)
+            static bool is_operator(std::string& self)
             {
                 for(auto& op : operators)
                 {
@@ -98,7 +98,7 @@ namespace Parsing{
                 return false;
             }
             
-            constexpr bool is_basic_operator()
+            bool is_basic_operator()
             {
                 for(auto& op : basic_operators)
                 {
@@ -107,7 +107,7 @@ namespace Parsing{
                 return false;
             }
             
-            static constexpr bool is_basic_operator(std::string& self)
+            static bool is_basic_operator(std::string& self)
             {
                 for(auto& op : basic_operators)
                 {
@@ -116,7 +116,7 @@ namespace Parsing{
                 return false;
             }
 
-            static constexpr bool is_basic_operator(const char& self)
+            static bool is_basic_operator(const char& self)
             {
                 for(auto& op : basic_operators)
                 {
@@ -125,32 +125,32 @@ namespace Parsing{
                 return false;
             }
             
-            constexpr bool is_any_bracket()
+            bool is_any_bracket()
             {
                 return self == "(" || self == ")";
             }
             
-            constexpr bool is_r_bracket()
+            bool is_r_bracket()
             {
                 return self == ")";
             }
             
-            constexpr bool is_l_bracket()
+            bool is_l_bracket()
             {
                 return self == "(";
             }
             
-            static constexpr bool is_any_bracket(char& self)
+            static bool is_any_bracket(char& self)
             {
                 return self == '(' || self == ')';
             }
             
-            static constexpr bool is_r_bracket(char& self)
+            static bool is_r_bracket(char& self)
             {
                 return self == ')';
             }
             
-            static constexpr bool is_l_bracket(char& self)
+            static bool is_l_bracket(char& self)
             {
                 return self == '(';
             }
@@ -220,6 +220,7 @@ namespace Parsing{
 
                     else throw std::invalid_argument("Unknown symbol encountered");
                 }
+                return out;
             }
     };
     
