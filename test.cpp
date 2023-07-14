@@ -1,15 +1,9 @@
-#include <iostream>
-
 #include "parsing.hpp"
 
 int main(){
-    double num;
-    std::string in;
+    std::vector<Parsing::Token> test;
+    test = Parsing::Token::tokenize("3+4");
+    for(auto& a : test) {std::cout << a.val() << "\n";}
 
-    while(true){
-        std::cout << "Enter an expression to evaluate\n";
-        std::cin >> in;
-        num = Parsing::parse_mstring<double>(in);
-        std::cout << num << "\n";
-    }
+
 }
