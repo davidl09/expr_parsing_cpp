@@ -1,9 +1,12 @@
 #include "parsing.hpp"
 
 int main(){
-    std::vector<Parsing::Token> test;
-    test = Parsing::Token::tokenize("3+4");
-    for(auto& a : test) {std::cout << a.val() << "\n";}
 
+    auto test = Parsing::Token::tokenize("sin(3/2)+3-a");
+    for(auto& a : test) {std::cout << a.string_val() << "\n";}
+    test = Parsing::ParsingShunt().convert_to_rpn(test);
+
+    std::cout << "\n\n";
+    for(auto& a : test) {std::cout << a.string_val();}
 
 }
