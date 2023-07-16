@@ -2,11 +2,8 @@
 
 int main(){
 
-    auto test = Parsing::Token::tokenize("sin(3/2)+3-a");
-    for(auto& a : test) {std::cout << a.string_val() << "\n";}
-    test = Parsing::ParsingShunt().convert_to_rpn(test);
-
-    std::cout << "\n\n";
-    for(auto& a : test) {std::cout << a.string_val();}
-
+    auto test = Parsing::Expression<double>("3+a/2");
+    auto val = test.evaluate({6.0});
+    std::cout << "\n" << val << std::endl;
+    
 }
