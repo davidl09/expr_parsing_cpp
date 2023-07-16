@@ -368,7 +368,6 @@ namespace Parsing{
             std::vector<Token> self;
             std::string variables;
 
-
             
         public:
             Expression(std::string expr)
@@ -385,6 +384,28 @@ namespace Parsing{
                 }
 
 
+            }
+
+            T evaluate(std::vector<T> vars)
+            {
+                std::vector<T> retval;
+                auto it = self.begin();
+
+                while(it != self.end())
+                {
+                    if(!it->is_operator())
+                    {
+                        retval.push_back(T(*it++)); //fix this
+                    }
+                    else
+                    {
+                        if(it->is_function())
+                        {
+                            assert(retval.size() > 0);
+                            //apply function to value, using lookup table with function pointers
+                        }
+                    }
+                }
             }
     };
 
