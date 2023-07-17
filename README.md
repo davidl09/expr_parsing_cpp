@@ -1,5 +1,20 @@
 # expr_parsing_cpp
 
-use the function template 'Parsing::parse_mstring' with any regular or custom numeric type to parse mathematical expressions stored as strings of characters. 
-
-Supported operators include parentheses, exponentiation ('^', ex. '3^4'), and the usual multiple +-*/. Unary minus is also supported. Use a^(1/n) to take the nth root of some number/expression a.
+Create Parsing::Expression<T>() objects with a string representing a valid mathematical expression to parse this expression. Call the .evaluate({}) method on this object to calculate its value. The string may contain any decimal representation of numbers, any single character variables, as well as the following operators:
+{
+        "+",
+        "-",
+        "*",
+        "/",
+        "^",
+        "sqrt(",
+        "exp(",
+        "sin(",
+        "cos(",
+        "tan(",
+        "asin(",
+        "acos(",
+        "atan(",
+        "log(",
+        "ln("
+}
