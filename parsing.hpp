@@ -313,6 +313,7 @@ namespace Parsing
             while (it != expression.end())
             {
 
+                if(*it == ' ') ++it;
                 if (is_r_bracket(*it))
                 {
                     temp.push_back(*it);

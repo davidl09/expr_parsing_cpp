@@ -1,11 +1,10 @@
 #include "parsing.hpp"
-
 #include <complex>
 
 int main(){
     
-    auto test = Parsing::Expression<std::complex<double>>("sin(4+z)");
+    auto test = Parsing::Expression<double>("exp(sin(1.57) + cos(1.57))");
     
-    std::cout << test.evaluate({std::complex<double>(0, 3)}) << "\n";
+    std::cout << test.evaluate({}) << "\n";
     
 }
