@@ -18,3 +18,5 @@ Create Parsing::Expression<T>() objects with a string representing a valid mathe
         "log(",
         "ln("
 }
+
+If the expression contains variables, pass a non-empty std::unordered_map<char, T> to the .evaluate({}) method: This will substitute in the values in place of the variables. Otherwise, pass an empty map by adding empty curly braces as the argument to .evalueate({}).
