@@ -3,8 +3,19 @@
 
 int main(){
     
-    auto test = Parsing::Expression<long double>("sin(a+b)");
-    
-    std::cout << test.evaluate({{'a', 2}, {'b', (long double)1.141592}}) << "\n";
+    char input[100];
+    while(true)
+    {
+        std::cout << "Enter an expression: \n";
+        std::cin.getline(&input[0], 100, '\n');
+        try{
+            auto t = Parsing::Expression<double>(input);
+            std::cout << "Value: " << t.evaluate({}) << "\n\n";
+        }
+        catch(...)
+        {
+            std::cout << "Malformed expression, try again\n";
+        }
+    }
     
 }
