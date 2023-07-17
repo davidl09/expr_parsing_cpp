@@ -478,9 +478,12 @@ namespace Parsing
 
         }
 
-        T evaluate(std::vector<T> vars)
+        T evaluate(std::unordered_map<char, T> vars)
         {
-            if(variables.size() != vars.size()) throw std::invalid_argument("Mismatched variable count\n");
+            for(const auto& v : variables)
+            {
+                if(vars.find(v) == vars.end()) throw std::invalid_argument("Missing variable value\n");
+            }
             std::vector<T> retval;
 
 
@@ -491,7 +494,7 @@ namespace Parsing
                 {
                     if(it->is_variable())
                     {
-                        retval.push_back(vars[variables.find(it->string_val()[0])]);
+                        retval.push_back(vars[it->string_val()[0]]);
                     }
                     else retval.push_back(convert_to<T>(it->string_val())); //may not work with custom types
                 }

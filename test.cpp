@@ -3,8 +3,8 @@
 
 int main(){
     
-    auto test = Parsing::Expression<double>("exp(sin(1.57) + cos(1.57))");
+    auto test = Parsing::Expression<double>("a+b");
     
-    std::cout << test.evaluate({}) << "\n";
+    std::cout << test.evaluate({{'a', 2}, {'b', 4}}) << "\n";
     
 }
