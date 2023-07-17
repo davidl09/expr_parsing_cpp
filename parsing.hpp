@@ -17,31 +17,32 @@ namespace Parsing
 {
 
     const static std::vector<std::string> operators =
-        {
-            "+",
-            "-",
-            "*",
-            "/",
-            "^",
-            "sqrt(",
-            "exp(",
-            "sin(",
-            "cos(",
-            "tan(",
-            "asin(",
-            "acos(",
-            "atan(",
-            "log(",
-            "log2(",
-            "ln("};
+    {
+        "+",
+        "-",
+        "*",
+        "/",
+        "^",
+        "sqrt(",
+        "exp(",
+        "sin(",
+        "cos(",
+        "tan(",
+        "asin(",
+        "acos(",
+        "atan(",
+        "log(",
+        "log2(",
+        "ln("
+    };
 
     const static std::vector<std::string> basic_operators =
-        {
-            "+",
-            "-",
-            "*",
-            "/",
-            "^",
+    {
+        "+",
+        "-",
+        "*",
+        "/",
+        "^",
     };
 
 
