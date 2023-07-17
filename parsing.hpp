@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <cassert>
 #include <functional>
 #include <map>
 #include <cmath>
@@ -338,7 +337,7 @@ namespace Parsing
                 {
                     if (is_l_bracket(*(it - 1)) || is_basic_operator(*(it - 1))) // unary minus
                     {
-                        assert(is_numerical(*(it + 1)));
+                        if(!is_numerical(*(it + 1))) throw std::invalid_argument("Malformed expression");
                         temp.push_back(*it++);
                     }
                     else
@@ -415,7 +414,7 @@ namespace Parsing
                         output.push_back(queue.back());
                         queue.pop_back();
                     }
-                    assert(queue.back().is_unary_func() || queue.back().is_l_bracket());
+                    if(!(queue.back().is_unary_func() || queue.back().is_l_bracket())) throw std::invalid_argument("Malformed expression");
                     if (queue.back().is_unary_func())
                     {
                         output.push_back(queue.back());
@@ -502,19 +501,19 @@ namespace Parsing
                 {
                     if(it->is_unary_func())
                     {
-                        assert(retval.size() > 0);
+                        if(!(retval.size() > 0)) throw std::invalid_argument("Malformed expression");
                         retval.back() = it->function_eval(retval.back());
                     }
                     else
                     {
-                        assert(retval.size() > 1);
+                        if(!(retval.size() > 1)) throw std::invalid_argument("Malformed expression");
                         retval[retval.size() - 2] = it->function_eval(retval[retval.size() - 2], retval.back());
                         retval.pop_back();
                     }
                 }
                 ++it;
             }
-            assert(retval.size() == 1);
+            if (!(retval.size() == 1)) throw std::invalid_argument("Missing operator, malformed expression");
             return retval.back();
         }
     };
