@@ -9,6 +9,7 @@
 #include <map>
 #include <cmath>
 #include <stdexcept>
+#include <complex>
 #include <iostream>
 
 #include "sstream_convert.hpp"
@@ -16,7 +17,7 @@
 namespace Parsing
 {
 
-    const std::vector<std::string> operators =
+    const static std::vector<std::string> operators =
         {
             "+",
             "-",
@@ -35,7 +36,7 @@ namespace Parsing
             "log2(",
             "ln("};
 
-    const std::vector<std::string> basic_operators =
+    const static std::vector<std::string> basic_operators =
         {
             "+",
             "-",
@@ -43,6 +44,7 @@ namespace Parsing
             "/",
             "^",
     };
+
 
     class Token
     {
@@ -170,15 +172,15 @@ namespace Parsing
             switch (self[0])
             {
             case '+':
-                return 1;
-            case '-':
-                return 1;
-            case '/':
                 return 2;
-            case '*':
+            case '-':
+                return 2;
+            case '/':
                 return 3;
-            case '^':
+            case '*':
                 return 4;
+            case '^':
+                return 5;
             }
             return 0;
         }
@@ -260,20 +262,24 @@ namespace Parsing
         template <typename T>
         T function_eval(T& input)
         {
-            std::unordered_map<std::string, std::function<T(T)>> unary_funcs;
-            unary_funcs["sqrt("] = [](T input){return std::sqrt(input);};
-            unary_funcs["exp("] = [](T input){return std::exp(input);};
-            unary_funcs["sin("] = [](T input){return std::sin(input);};
-            unary_funcs["cos("] = [](T input){return std::cos(input);};
-            unary_funcs["tan("] = [](T input){return std::tan(input);};
-            unary_funcs["asin("] = [](T input){return std::asin(input);};
-            unary_funcs["acos("] = [](T input){return std::acos(input);};
-            unary_funcs["atan("] = [](T input){return std::atan(input);};
-            unary_funcs["ln("] = [](T input){return std::log(input);};
-            unary_funcs["log2("] = [](T input){return std::log2(input);};
-            unary_funcs["log("] = [](T input){return std::log10(input);};
+            static std::unordered_map<std::string, std::function<T(T)>> unary_funcs(
+                {
+                    {"sqrt(", [](T input){return std::sqrt(input);}},
+                    {"exp(", [](T input){return std::exp(input);}},
+                    {"sin(", [](T input){return std::sin(input);}},
+                    {"cos(", [](T input){return std::cos(input);}},
+                    {"tan(", [](T input){return std::tan(input);}},
+                    {"asin(", [](T input){return std::asin(input);}},
+                    {"acos(", [](T input){return std::acos(input);}},
+                    {"atan(", [](T input){return std::atan(input);}},
+                    {"ln(", [](T input){return std::log(input);}},
+                    //{"log2(", [](T input){return std::log2(input);}},
+                    {"log(", [](T input){return std::log10(input);}},
+                }
+            );
+            
 
-            if(unary_funcs[self]) return (unary_funcs[self])(input);
+            if(unary_funcs.find(self) != unary_funcs.end()) return (unary_funcs[self])(input);
             
             throw std::invalid_argument("Unknown function token");
         }
@@ -281,14 +287,17 @@ namespace Parsing
         template <typename T>
         T function_eval(T left, T right)
         {
-            std::unordered_map<std::string, std::function<T(T,T)>> binary_ops;
-            binary_ops["+"] = [](T left, T right){return left + right;};
-            binary_ops["-"] = [](T left, T right){return left - right;};
-            binary_ops["*"] = [](T left, T right){return left * right;};
-            binary_ops["/"] = [](T left, T right){return left / right;};
-            binary_ops["^"] = [](T left, T right){return std::pow(left, right);};
+            static std::unordered_map<std::string, std::function<T(T,T)>> binary_ops(
+                {
+                    {"+", [](T left, T right){return left + right;}},
+                    {"-", [](T left, T right){return left - right;}},
+                    {"*", [](T left, T right){return left * right;}},
+                    {"/", [](T left, T right){return left / right;}},
+                    {"^", [](T left, T right){return std::pow(left, right);}},
+                }
+            );
 
-            if(binary_ops[self]) return (binary_ops[self])(left, right);
+            if(binary_ops.find(self) != binary_ops.end()) return (binary_ops[self])(left, right);
             throw std::invalid_argument("Unknown operator token");
         }
 
@@ -418,7 +427,9 @@ namespace Parsing
                     while (
                         queue.size() > 0 &&
                         ((i->right_associate() && (i->op_precedence() < queue.back().op_precedence())) ||
-                         (i->op_precedence() <= queue.back().op_precedence())))
+                         (!i->right_associate() && (i->op_precedence() <= queue.back().op_precedence()))
+                        )
+                    )
                     {
                         output.push_back(queue.back());
                         queue.pop_back();
