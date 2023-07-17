@@ -1,9 +1,15 @@
 #include "parsing.hpp"
 
 int main(){
+    
+    auto test = Parsing::Expression<double>("exp(cos(x^2))");
+    for(int i = -2; i < 3; i++)
+    {
+        std::cout << test.evaluate({(double)i}) << "\n";
+    }
 
-    auto test = Parsing::Expression<double>("3+a/2");
-    auto val = test.evaluate({6.0});
-    std::cout << "\n" << val << std::endl;
+/*
+    double a = 2, b = 3;
+    std::cout << Parsing::Token("/").function_eval<double>(a, b);*/
     
 }

@@ -164,7 +164,7 @@ namespace Parsing
         {
             if (!is_operator())
                 return 0; // values have '0' precedence
-            if (!is_binary())
+            if (!is_binary_op())
                 return 1; // all functions have lowest precedence
 
             switch (self[0])
@@ -183,7 +183,7 @@ namespace Parsing
             return 0;
         }
 
-        bool is_binary()
+        bool is_binary_op()
         {
             for (auto &op : basic_operators)
             {
@@ -215,7 +215,7 @@ namespace Parsing
 
         bool is_unary_func()
         {
-            return is_operator() && !is_binary();
+            return is_operator() && !is_binary_op();
         }
 
         bool right_associate()
@@ -226,7 +226,6 @@ namespace Parsing
         Token &operator=(Token &a)
         {
             this->self = a.self;
-            
             return *this;
         }
 
@@ -259,7 +258,7 @@ namespace Parsing
         }
 
         template <typename T>
-        T function_eval(T input)
+        T function_eval(T& input)
         {
             std::unordered_map<std::string, std::function<T(T)>> unary_funcs;
             unary_funcs["sqrt("] = [](T input){return std::sqrt(input);};
@@ -290,7 +289,7 @@ namespace Parsing
             binary_ops["^"] = [](T left, T right){return std::pow(left, right);};
 
             if(binary_ops[self]) return (binary_ops[self])(left, right);
-            throw std::invalid_argument("Unknown function token");
+            throw std::invalid_argument("Unknown operator token");
         }
 
         static std::vector<Token> tokenize(std::string expression)
@@ -494,7 +493,7 @@ namespace Parsing
                     else
                     {
                         assert(retval.size() > 1);
-                        retval[retval.size() - 2] = it->function_eval(retval[retval.size() - 2], retval[retval.back()]);
+                        retval[retval.size() - 2] = it->function_eval(retval[retval.size() - 2], retval.back());
                         retval.pop_back();
                     }
                 }
