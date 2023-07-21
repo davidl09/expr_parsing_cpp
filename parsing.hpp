@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 #include <cmath>
+#include <type_traits>
 #include <stdexcept>
 #include <complex>
 #include <iostream>
@@ -33,8 +34,41 @@ namespace Parsing
         "atan(",
         "log(",
         "log2(",
-        "ln("
+        "ln(",
+        "real(",
+        "imag(",
+        "arg(",
+        "abs("
     };
+
+    template<typename T>
+    static std::unordered_map<std::string, std::function<T(T)>> unary_funcs(
+        {
+            {"sqrt(", [](T input){return std::sqrt(input);}},
+            {"exp(", [](T input){return std::exp(input);}},
+            {"sin(", [](T input){return std::sin(input);}},
+            {"cos(", [](T input){return std::cos(input);}},
+            {"tan(", [](T input){return std::tan(input);}},
+            {"asin(", [](T input){return std::asin(input);}},
+            {"acos(", [](T input){return std::acos(input);}},
+            {"atan(", [](T input){return std::atan(input);}},
+            {"ln(", [](T input){return std::log(input);}},
+            //{"log2(", [](T input){return std::log2(input);}},
+            {"log(", [](T input){return std::log10(input);}},
+            {"abs(", [](T input){return std::abs(input);}},
+        }
+    );
+
+    template<typename T>
+    static std::unordered_map<std::string, std::function<T(T,T)>> binary_ops(
+        {
+            {"+", [](T left, T right){return left + right;}},
+            {"-", [](T left, T right){return left - right;}},
+            {"*", [](T left, T right){return left * right;}},
+            {"/", [](T left, T right){return left / right;}},
+            {"^", [](T left, T right){return std::pow(left, right);}},
+        }
+    );
 
     const static std::vector<std::string> basic_operators =
     {
@@ -44,6 +78,15 @@ namespace Parsing
         "/",
         "^",
     };
+
+    template<typename T>
+    struct is_complex_t : public std::false_type {};
+
+    template<typename T>
+    struct is_complex_t<std::complex<T>> : public std::true_type {};
+
+    template<typename T>
+    constexpr bool is_complex() { return is_complex_t<T>::value; }
 
 
     class Token
@@ -262,24 +305,7 @@ namespace Parsing
         template <typename T>
         T function_eval(T& input)
         {
-            static std::unordered_map<std::string, std::function<T(T)>> unary_funcs(
-                {
-                    {"sqrt(", [](T input){return std::sqrt(input);}},
-                    {"exp(", [](T input){return std::exp(input);}},
-                    {"sin(", [](T input){return std::sin(input);}},
-                    {"cos(", [](T input){return std::cos(input);}},
-                    {"tan(", [](T input){return std::tan(input);}},
-                    {"asin(", [](T input){return std::asin(input);}},
-                    {"acos(", [](T input){return std::acos(input);}},
-                    {"atan(", [](T input){return std::atan(input);}},
-                    {"ln(", [](T input){return std::log(input);}},
-                    //{"log2(", [](T input){return std::log2(input);}},
-                    {"log(", [](T input){return std::log10(input);}},
-                }
-            );
-            
-
-            if(unary_funcs.find(self) != unary_funcs.end()) return (unary_funcs[self])(input);
+            if(unary_funcs<T>.find(self) != unary_funcs<T>.end()) return (unary_funcs<T>[self])(input);
             
             throw std::invalid_argument("Unknown function token");
         }
@@ -287,17 +313,8 @@ namespace Parsing
         template <typename T>
         T function_eval(T left, T right)
         {
-            static std::unordered_map<std::string, std::function<T(T,T)>> binary_ops(
-                {
-                    {"+", [](T left, T right){return left + right;}},
-                    {"-", [](T left, T right){return left - right;}},
-                    {"*", [](T left, T right){return left * right;}},
-                    {"/", [](T left, T right){return left / right;}},
-                    {"^", [](T left, T right){return std::pow(left, right);}},
-                }
-            );
 
-            if(binary_ops.find(self) != binary_ops.end()) return (binary_ops[self])(left, right);
+            if(binary_ops<T>.find(self) != binary_ops<T>.end()) return (binary_ops<T>[self])(left, right);
             throw std::invalid_argument("Unknown operator token");
         }
 
@@ -476,14 +493,24 @@ namespace Parsing
                 }
             }
 
+            if(is_complex<T>())
+            {
+                unary_funcs<T>["real("] = [](T input){return std::real(input);};
+                unary_funcs<T>["imag("] = [](T input){return std::imag(input);};
+                unary_funcs<T>["arg("]  = [](T input){return std::arg(input);};
+                variables.push_back('i');
+            } 
+
         }
 
         T evaluate(std::unordered_map<char, T> vars)
         {
+            if(is_complex<T>()) vars['i'] = (0,(T)1);
             for(const auto& v : variables)
             {
                 if(vars.find(v) == vars.end()) throw std::invalid_argument("Missing variable value\n");
             }
+            
             std::vector<T> retval;
 
 
