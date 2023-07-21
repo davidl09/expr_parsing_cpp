@@ -330,8 +330,10 @@ namespace Parsing
             while (it != expression.end())
             {
 
-                if(*it == ' ') ++it;
-                if (is_r_bracket(*it))
+                if(*it < 33) 
+                    ++it;
+                    
+                else if (is_r_bracket(*it))
                 {
                     temp.push_back(*it);
                     out.push_back(Token(temp));
@@ -541,7 +543,7 @@ namespace Parsing
                 }
                 ++it;
             }
-            if (!(retval.size() == 1)) throw std::invalid_argument("Missing operator, malformed expression");
+            if (!(retval.size() == 1)) throw std::invalid_argument("Extra operator, malformed expression");
             return retval.back();
         }
     };
