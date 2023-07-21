@@ -357,7 +357,7 @@ namespace Parsing
                 {
                     if (it == expression.begin() || is_l_bracket(*(it - 1)) || is_basic_operator(*(it - 1))) // unary minus
                     {
-                        if(!is_numerical(*(it + 1))) throw std::invalid_argument("Malformed expression");
+                        if(!is_numerical(*(it + 1)) && !is_alpha(*(it + 1))) throw std::invalid_argument("Malformed expression");
                         temp.push_back(*it++);
                     }
                     else
