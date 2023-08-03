@@ -5,11 +5,8 @@
 
 test
 test.dSYM/
-.vscode/
-*.json
-
+settings.json
 build/
-*.txt
 # Compiled Object files
 *.slo
 *.lo
