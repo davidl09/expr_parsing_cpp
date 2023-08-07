@@ -255,7 +255,7 @@ namespace Parsing
 
         bool is_variable()
         {
-            return self.length() == 1 && is_alpha(self[0]);
+            return is_alpha(self.back());
         }
 
         bool is_unary_func()
@@ -303,7 +303,7 @@ namespace Parsing
         }
 
         template <typename T>
-        T function_eval(T& input)
+        T function_eval(T input)//deleted &
         {
             if(unary_funcs<T>.find(self) != unary_funcs<T>.end()) return (unary_funcs<T>[self])(input);
             
@@ -313,7 +313,6 @@ namespace Parsing
         template <typename T>
         T function_eval(T left, T right)
         {
-
             if(binary_ops<T>.find(self) != binary_ops<T>.end()) return (binary_ops<T>[self])(left, right);
             throw std::invalid_argument("Unknown operator token");
         }
@@ -491,7 +490,7 @@ namespace Parsing
             {
                 if (t.is_variable())
                 {
-                    variables.push_back(t.string_val()[0]);
+                    variables.push_back(t.string_val().back());
                 }
             }
 
@@ -523,7 +522,10 @@ namespace Parsing
                 {
                     if(it->is_variable())
                     {
-                        retval.push_back(vars[it->string_val()[0]]);
+                        bool unary_minus = (it->string_val()[0] == '-');
+                        retval.push_back(
+                            (T)(unary_minus ? -1 : 1) * (vars[it->string_val().back()])
+                        ); //added support for unary minus
                     }
                     else retval.push_back(convert_to<T>(it->string_val())); //may not work with custom types
                 }
