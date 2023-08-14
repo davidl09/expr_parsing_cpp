@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "~/.conan/data/gtest/1.13.0/**"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "gcc-x64"
+        },
+        {
+            "name": "Windows",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "~/.conan/data/gtest/1.13.0/**"
+            ],
+            "cppStandard": "c++14",
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}
