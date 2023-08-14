@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <complex>
 #include <iostream>
+#include <unordered_map>
 
 #include "sstream_convert.hpp"
 
@@ -44,18 +45,18 @@ namespace Parsing
     template<typename T>
     static std::unordered_map<std::string, std::function<T(T)>> unary_funcs(
         {
-            {"sqrt(", [](T input){return std::sqrt(input);}},
-            {"exp(", [](T input){return std::exp(input);}},
-            {"sin(", [](T input){return std::sin(input);}},
-            {"cos(", [](T input){return std::cos(input);}},
-            {"tan(", [](T input){return std::tan(input);}},
-            {"asin(", [](T input){return std::asin(input);}},
-            {"acos(", [](T input){return std::acos(input);}},
-            {"atan(", [](T input){return std::atan(input);}},
-            {"ln(", [](T input){return std::log(input);}},
-            //{"log2(", [](T input){return std::log2(input);}},
-            {"log(", [](T input){return std::log10(input);}},
-            {"abs(", [](T input){return std::abs(input);}},
+            {"sqrt(", [](T input){return static_cast<T>(std::sqrt(static_cast<double>(input)));}},
+            {"exp(", [](T input){return static_cast<T>(std::exp(static_cast<double>(input)));}},
+            {"sin(", [](T input){return static_cast<T>(std::sin(static_cast<double>(input)));}},
+            {"cos(", [](T input){return static_cast<T>(std::cos(static_cast<double>(input)));}},
+            {"tan(", [](T input){return static_cast<T>(std::tan(static_cast<double>(input)));}},
+            {"asin(", [](T input){return static_cast<T>(std::asin(static_cast<double>(input)));}},
+            {"acos(", [](T input){return static_cast<T>(std::acos(static_cast<double>(input)));}},
+            {"atan(", [](T input){return static_cast<T>(std::atan(static_cast<double>(input)));}},
+            {"ln(", [](T input){return static_cast<T>(std::log(static_cast<double>(input)));}},
+            //{"log2(", [](T input){return static_cast<T>(std::log2(static_cast<double>(input)));}}
+            {"log(", [](T input){return static_cast<T>(std::log10(static_cast<double>(input)));}},
+            {"abs(", [](T input){return static_cast<T>(std::abs(static_cast<double>(input)));}}
         }
     );
 
@@ -66,7 +67,7 @@ namespace Parsing
             {"-", [](T left, T right){return left - right;}},
             {"*", [](T left, T right){return left * right;}},
             {"/", [](T left, T right){return left / right;}},
-            {"^", [](T left, T right){return std::pow(left, right);}},
+            {"^", [](T left, T right){return static_cast<T>(std::pow(static_cast<double>(left), static_cast<double>(right)));}},
         }
     );
 
@@ -506,7 +507,8 @@ namespace Parsing
 
         T evaluate(std::unordered_map<char, T> vars)
         {
-            if(is_complex<T>()) vars['i'] = {0,1};
+            // Doesn't work unless you have complex type 'T' (i.e. cannot cast {0,1} to int for example)
+            // if(is_complex<T>()) vars['i'] = {0,1};
             for(const auto& v : variables)
             {
                 if(vars.find(v) == vars.end()) throw std::invalid_argument("Missing variable value\n");
