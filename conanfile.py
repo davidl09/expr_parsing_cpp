@@ -26,7 +26,7 @@ class ExpressionParser(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("gtest/1.13.0")
+        self.build_requires("gtest/1.12.1")
 
     def build(self):
         cmake = self._configure_cmake()
