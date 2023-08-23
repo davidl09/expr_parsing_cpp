@@ -557,11 +557,16 @@ namespace Parsing
             {
                 evaluate(variables);
             }
-            catch(std::invalid_argument&)
+            catch(std::invalid_argument& e)
             {
                 return false;
             }
             return true;
+        }
+
+        void validate_with_except(std::unordered_map<char, T> variables)
+        {
+            evaluate(variables);
         }
     };
 
