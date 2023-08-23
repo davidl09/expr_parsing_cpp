@@ -13,6 +13,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <boost/math/special_functions/gamma.hpp>
+
 #include "sstream_convert.hpp"
 
 namespace Parsing
@@ -39,7 +41,8 @@ namespace Parsing
         "real(",
         "imag(",
         "arg(",
-        "abs("
+        "abs(",
+        "gamma("
     };
 
     template<typename T>
@@ -56,7 +59,8 @@ namespace Parsing
             {"ln(", [](T input){return static_cast<T>(std::log(static_cast<T>(input)));}},
             //{"log2(", [](T input){return static_cast<T>(std::log2(static_cast<T>(input)));}}
             {"log(", [](T input){return static_cast<T>(std::log10(static_cast<T>(input)));}},
-            {"abs(", [](T input){return static_cast<T>(std::abs(static_cast<T>(input)));}}
+            {"abs(", [](T input){return static_cast<T>(std::abs(static_cast<T>(input)));}},
+            {"gamma(", [](T input){return static_cast<T>(boost::math::tgamma(static_cast<T>(input)));}}
         }
     );
 
@@ -508,7 +512,7 @@ namespace Parsing
         T evaluate(std::unordered_map<char, T> vars)
         {
             // Doesn't work unless you have complex type 'T' (i.e. cannot cast {0,1} to int for example)
-            if(is_complex<T>()) vars['i'] = {0,1};
+            //if(is_complex<T>()) vars['i'] = {0,1};
             for(const auto& v : variables)
             {
                 if(vars.find(v) == vars.end()) throw std::invalid_argument("Missing variable value\n");
