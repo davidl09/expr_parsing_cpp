@@ -45,18 +45,18 @@ namespace Parsing
     template<typename T>
     static std::unordered_map<std::string, std::function<T(T)>> unary_funcs(
         {
-            {"sqrt(", [](T input){return static_cast<T>(std::sqrt(static_cast<double>(input)));}},
-            {"exp(", [](T input){return static_cast<T>(std::exp(static_cast<double>(input)));}},
-            {"sin(", [](T input){return static_cast<T>(std::sin(static_cast<double>(input)));}},
-            {"cos(", [](T input){return static_cast<T>(std::cos(static_cast<double>(input)));}},
-            {"tan(", [](T input){return static_cast<T>(std::tan(static_cast<double>(input)));}},
-            {"asin(", [](T input){return static_cast<T>(std::asin(static_cast<double>(input)));}},
-            {"acos(", [](T input){return static_cast<T>(std::acos(static_cast<double>(input)));}},
-            {"atan(", [](T input){return static_cast<T>(std::atan(static_cast<double>(input)));}},
-            {"ln(", [](T input){return static_cast<T>(std::log(static_cast<double>(input)));}},
-            //{"log2(", [](T input){return static_cast<T>(std::log2(static_cast<double>(input)));}}
-            {"log(", [](T input){return static_cast<T>(std::log10(static_cast<double>(input)));}},
-            {"abs(", [](T input){return static_cast<T>(std::abs(static_cast<double>(input)));}}
+            {"sqrt(", [](T input){return static_cast<T>(std::sqrt(static_cast<T>(input)));}},
+            {"exp(", [](T input){return static_cast<T>(std::exp(static_cast<T>(input)));}},
+            {"sin(", [](T input){return static_cast<T>(std::sin(static_cast<T>(input)));}},
+            {"cos(", [](T input){return static_cast<T>(std::cos(static_cast<T>(input)));}},
+            {"tan(", [](T input){return static_cast<T>(std::tan(static_cast<T>(input)));}},
+            {"asin(", [](T input){return static_cast<T>(std::asin(static_cast<T>(input)));}},
+            {"acos(", [](T input){return static_cast<T>(std::acos(static_cast<T>(input)));}},
+            {"atan(", [](T input){return static_cast<T>(std::atan(static_cast<T>(input)));}},
+            {"ln(", [](T input){return static_cast<T>(std::log(static_cast<T>(input)));}},
+            //{"log2(", [](T input){return static_cast<T>(std::log2(static_cast<T>(input)));}}
+            {"log(", [](T input){return static_cast<T>(std::log10(static_cast<T>(input)));}},
+            {"abs(", [](T input){return static_cast<T>(std::abs(static_cast<T>(input)));}}
         }
     );
 
@@ -67,7 +67,7 @@ namespace Parsing
             {"-", [](T left, T right){return left - right;}},
             {"*", [](T left, T right){return left * right;}},
             {"/", [](T left, T right){return left / right;}},
-            {"^", [](T left, T right){return static_cast<T>(std::pow(static_cast<double>(left), static_cast<double>(right)));}},
+            {"^", [](T left, T right){return static_cast<T>(std::pow(static_cast<T>(left), static_cast<T>(right)));}},
         }
     );
 
@@ -508,7 +508,7 @@ namespace Parsing
         T evaluate(std::unordered_map<char, T> vars)
         {
             // Doesn't work unless you have complex type 'T' (i.e. cannot cast {0,1} to int for example)
-            // if(is_complex<T>()) vars['i'] = {0,1};
+            if(is_complex<T>()) vars['i'] = {0,1};
             for(const auto& v : variables)
             {
                 if(vars.find(v) == vars.end()) throw std::invalid_argument("Missing variable value\n");
@@ -549,6 +549,24 @@ namespace Parsing
             }
             if (!(retval.size() == 1)) throw std::invalid_argument("Extra operator, malformed expression");
             return retval.back();
+        }
+
+        bool validate(std::unordered_map<char, T> variables)
+        {
+            try
+            {
+                evaluate(variables);
+            }
+            catch(std::invalid_argument& e)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        void validate_with_except(std::unordered_map<char, T> variables)
+        {
+            evaluate(variables);
         }
     };
 
