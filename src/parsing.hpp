@@ -12,13 +12,59 @@
 #include <complex>
 #include <iostream>
 #include <unordered_map>
+#include <gsl/gsl_sf_gamma.h>
 
-#include <boost/math/special_functions/gamma.hpp>
 
 #include "sstream_convert.hpp"
 
-namespace Parsing
-{
+namespace Parsing::Math {
+    const long double LOWER_THRESHOLD = 1.0e-6;
+    const long double UPPER_BOUND = 1.0e+4;
+    const int MAXNUM = 100;
+
+    static std::complex<long double> zeta(const std::complex<long double>& s)
+    {
+        std::complex<long double> a_arr[MAXNUM + 1];
+        std::complex<long double> half(0.5, 0.0);
+        std::complex<long double> one(1.0, 0.0);
+        std::complex<long double> two(2.0, 0.0);
+        std::complex<long double> rev(-1.0, 0.0);
+        std::complex<long double> sum(0.0, 0.0);
+        std::complex<long double> prev(1.0e+20, 0.0);
+        
+        a_arr[0] = half / (one - std::pow(two, (one - s))); //initialize with a_0 = 0.5 / (1 - 2^(1-s))
+        sum += a_arr[0];
+
+        for (int n = 1; n <= MAXNUM; n++)
+        {
+            std::complex<long double> nCplx(n, 0.0); //complex index
+
+            for (int k = 0; k < n; k++)
+            {
+                std::complex<long double> kCplx(k, 0.0); //complex index
+
+                a_arr[k] *= half * (nCplx / (nCplx - kCplx));
+                sum += a_arr[k];
+            }
+
+            a_arr[n] = (rev * a_arr[n - 1] * std::pow((nCplx / (nCplx + one)), s) / nCplx);
+            sum += a_arr[n];
+
+
+            if (std::abs(prev - sum) < LOWER_THRESHOLD)//If the difference is less than or equal to the threshold value, it is considered to be convergent and the calculation is terminated.
+                break;
+
+            if (std::abs(sum) > UPPER_BOUND)//doesn't work for large values, so it gets terminated when it exceeds UPPER_BOUND
+                break;
+
+            prev = sum;
+        }
+
+        return sum;
+    }
+}
+
+namespace Parsing {
 
     const static std::vector<std::string> operators = //duplicate of unordered_map below, needs to be integrated
     {
@@ -32,6 +78,9 @@ namespace Parsing
         "sin(",
         "cos(",
         "tan(",
+        "csec(",
+        "sec(",
+        "cot(",
         "asin(",
         "acos(",
         "atan(",
@@ -42,7 +91,8 @@ namespace Parsing
         "imag(",
         "arg(",
         "abs(",
-        "gamma("
+        "gamma(",
+        "zeta("
     };
 
     template<typename T>
@@ -53,16 +103,20 @@ namespace Parsing
             {"sin(", [](T input){return static_cast<T>(std::sin(static_cast<T>(input)));}},
             {"cos(", [](T input){return static_cast<T>(std::cos(static_cast<T>(input)));}},
             {"tan(", [](T input){return static_cast<T>(std::tan(static_cast<T>(input)));}},
+            {"csec(", [](T input){return static_cast<T>(1.0 / std::sin(static_cast<T>(input)));}},
+            {"sec(", [](T input){return static_cast<T>(1.0 / std::cos(static_cast<T>(input)));}},
+            {"cot(", [](T input){return static_cast<T>(std::sin(static_cast<T>(input)) / std::cos(static_cast<T>(input)));}},
             {"asin(", [](T input){return static_cast<T>(std::asin(static_cast<T>(input)));}},
             {"acos(", [](T input){return static_cast<T>(std::acos(static_cast<T>(input)));}},
             {"atan(", [](T input){return static_cast<T>(std::atan(static_cast<T>(input)));}},
             {"ln(", [](T input){return static_cast<T>(std::log(static_cast<T>(input)));}},
-            //{"log2(", [](T input){return static_cast<T>(std::log2(static_cast<T>(input)));}}
             {"log(", [](T input){return static_cast<T>(std::log10(static_cast<T>(input)));}},
             {"abs(", [](T input){return static_cast<T>(std::abs(static_cast<T>(input)));}},
-            {"gamma(", [](T input){return static_cast<T>(boost::math::tgamma(static_cast<T>(input)));}}
+            {"zeta(", [](T input){return static_cast<T>(Math::zeta(static_cast<std::complex<long double>>(input)));}}
         }
     );
+
+    //ln(Γ(x))=12ln(2π)+(x−12)ln(x)−x+x2ln(xsinh(1x)+1810x6)
 
     template<typename T>
     static std::unordered_map<std::string, std::function<T(T,T)>> binary_ops(
@@ -504,7 +558,6 @@ namespace Parsing
                 unary_funcs<T>["real("] = [](T input){return std::real(input);};
                 unary_funcs<T>["imag("] = [](T input){return std::imag(input);};
                 unary_funcs<T>["arg("]  = [](T input){return std::arg(input);};
-                variables.push_back('i');
             } 
 
         }
@@ -512,7 +565,7 @@ namespace Parsing
         T evaluate(std::unordered_map<char, T> vars)
         {
             // Doesn't work unless you have complex type 'T' (i.e. cannot cast {0,1} to int for example)
-            //if(is_complex<T>()) vars['i'] = {0,1};
+            //if(is_complex<T>()) vars['i'] = {0,1}; //need to fix this or manually add 'i' to variable value list
             for(const auto& v : variables)
             {
                 if(vars.find(v) == vars.end()) throw std::invalid_argument("Missing variable value\n");
@@ -575,5 +628,6 @@ namespace Parsing
     };
 
 }
+
 
 #endif
