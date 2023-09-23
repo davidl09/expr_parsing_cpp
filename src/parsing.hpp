@@ -91,7 +91,7 @@ namespace Parsing {
         "imag(",
         "arg(",
         "abs(",
-        "gamma(",
+        //"gamma(",
         "zeta("
     };
 
@@ -105,12 +105,13 @@ namespace Parsing {
             {"tan(", [](T input){return static_cast<T>(std::tan(static_cast<T>(input)));}},
             {"csec(", [](T input){return static_cast<T>(1.0 / std::sin(static_cast<T>(input)));}},
             {"sec(", [](T input){return static_cast<T>(1.0 / std::cos(static_cast<T>(input)));}},
-            {"cot(", [](T input){return static_cast<T>(std::sin(static_cast<T>(input)) / std::cos(static_cast<T>(input)));}},
+            {"cot(", [](T input){return static_cast<T>(1) / std::tan(static_cast<T>(input));}},
             {"asin(", [](T input){return static_cast<T>(std::asin(static_cast<T>(input)));}},
             {"acos(", [](T input){return static_cast<T>(std::acos(static_cast<T>(input)));}},
             {"atan(", [](T input){return static_cast<T>(std::atan(static_cast<T>(input)));}},
             {"ln(", [](T input){return static_cast<T>(std::log(static_cast<T>(input)));}},
             {"log(", [](T input){return static_cast<T>(std::log10(static_cast<T>(input)));}},
+            {"log2(", [](T input){return static_cast<T>(std::log(static_cast<T>(input)) / std::log(2));}},
             {"abs(", [](T input){return static_cast<T>(std::abs(static_cast<T>(input)));}},
             {"zeta(", [](T input){return static_cast<T>(Math::zeta(static_cast<std::complex<long double>>(input)));}}
         }
