@@ -12,10 +12,18 @@
 #include <complex>
 #include <iostream>
 #include <unordered_map>
-#include <gsl/gsl_sf_gamma.h>
 
 
-#include "sstream_convert.hpp"
+
+template <typename T>
+T convert_to(const std::string &str)
+{
+    std::istringstream ss(str);
+    T num;
+    ss >> num;
+    return num;
+}
+
 
 namespace Parsing::Math {
     const long double LOWER_THRESHOLD = 1.0e-6;
