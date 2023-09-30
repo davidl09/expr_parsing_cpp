@@ -2,6 +2,7 @@
 #define PARSING_HPP
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <algorithm>
 #include <functional>
@@ -221,7 +222,7 @@ namespace Parsing {
         }
 
     public:
-        explicit Token(const std::string& value) : self(value)
+        explicit constexpr Token(std::string  value) : self(std::move(value))
         {
             for (auto &it : self)
             {
@@ -230,7 +231,7 @@ namespace Parsing {
             }
         }
 
-        constexpr const std::string &string_val() const
+        [[nodiscard]] constexpr const std::string &string_val() const
         {
             return self;
         }
@@ -248,7 +249,7 @@ namespace Parsing {
             return (c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A');
         }
 
-        constexpr bool is_numerical() const
+        [[nodiscard]] constexpr bool is_numerical() const
         {
             for (auto &it : self)
             {
@@ -263,7 +264,7 @@ namespace Parsing {
             return (c <= '9' && c >= '0') || c == '.';
         }
 
-        constexpr bool is_operator() const
+        [[nodiscard]] constexpr bool is_operator() const
         {
             for (auto &op : operators)
             {
@@ -273,7 +274,7 @@ namespace Parsing {
             return false;
         }
 
-        constexpr const int op_precedence() const
+        [[nodiscard]] constexpr int op_precedence() const
         {
             if (!is_operator())
                 return 0; // values have '0' precedence
@@ -296,7 +297,7 @@ namespace Parsing {
             return 0;
         }
 
-        constexpr bool is_binary_op() const
+        [[nodiscard]] constexpr bool is_binary_op() const
         {
             for (auto &op : basic_operators)
             {
@@ -306,32 +307,32 @@ namespace Parsing {
             return false;
         }
 
-        constexpr bool is_any_bracket() const
+        [[nodiscard]] constexpr bool is_any_bracket() const
         {
             return self == "(" || self == ")";
         }
 
-        constexpr bool is_r_bracket() const
+        [[nodiscard]] constexpr bool is_r_bracket() const
         {
             return self == ")";
         }
 
-        constexpr bool is_l_bracket() const
+        [[nodiscard]] constexpr bool is_l_bracket() const
         {
             return self == "(";
         }
 
-        constexpr bool is_variable() const
+        [[nodiscard]] constexpr bool is_variable() const
         {
             return is_alpha(self.back());
         }
 
-        constexpr bool is_unary_func() const
+        [[nodiscard]] constexpr bool is_unary_func() const
         {
             return is_operator() && !is_binary_op();
         }
 
-        constexpr bool right_associate() const
+        [[nodiscard]] constexpr bool right_associate() const
         {
             return self == "^";
         }
@@ -375,7 +376,7 @@ namespace Parsing {
                 else if (is_r_bracket(*it))
                 {
                     temp.push_back(*it);
-                    out.push_back(Token(temp));
+                    out.emplace_back(temp);
                     temp.erase();
                     ++it;
                     continue;
@@ -388,7 +389,7 @@ namespace Parsing {
                         temp.push_back(*it);
                         ++it;
                     }
-                    out.push_back(Token(temp));
+                    out.emplace_back(temp);
                     temp.erase();
                 }
 
@@ -429,7 +430,7 @@ namespace Parsing {
                         {
                             temp.push_back(*it);
                         }
-                        out.push_back(Token(temp));
+                        out.emplace_back(temp);
                         temp.erase();
                     }
                 }
@@ -437,7 +438,7 @@ namespace Parsing {
                 else if (is_l_bracket(*it))
                 {
                     temp.push_back(*it);
-                    out.push_back(Token(temp));
+                    out.emplace_back(temp);
                     temp.erase();
                     ++it;
                 }
@@ -543,7 +544,7 @@ namespace Parsing {
 
         }
 
-        T evaluate(std::unordered_map<char, T> vars)
+        constexpr T evaluate(std::unordered_map<char, T> vars)
         {
             // Doesn't work unless you have complex type 'T' (i.e. cannot cast {0,1} to int for example)
             //if(is_complex<T>()) vars['i'] = {0,1}; //need to fix this or manually add 'i' to variable value list
