@@ -162,22 +162,22 @@ namespace Parsing {
     private:
         std::string self;
 
-        static bool is_any_bracket(const char &self)
+        constexpr static bool is_any_bracket(const char &self)
         {
             return self == '(' || self == ')';
         }
 
-        static bool is_r_bracket(const char &self)
+        constexpr static bool is_r_bracket(const char &self)
         {
             return self == ')';
         }
 
-        static bool is_l_bracket(const char &self)
+        constexpr static bool is_l_bracket(const char &self)
         {
             return self == '(';
         }
 
-        static bool matched_brackets(std::string expr)
+        constexpr static bool matched_brackets(const std::string& expr)
         {
             int b = 0;
             for (auto &c : expr)
@@ -190,7 +190,7 @@ namespace Parsing {
             return b == 0;
         }
 
-        static bool is_basic_operator(const char &self)
+        constexpr static bool is_basic_operator(const char &self)
         {
             for (auto &op : basic_operators)
             {
@@ -200,7 +200,7 @@ namespace Parsing {
             return false;
         }
 
-        static bool is_basic_operator(std::string &self)
+        constexpr static bool is_basic_operator(std::string &self)
         {
             for (auto &op : basic_operators)
             {
@@ -210,7 +210,7 @@ namespace Parsing {
             return false;
         }
 
-        static bool is_operator(std::string &self)
+        constexpr static bool is_operator(std::string &self)
         {
             for (auto &op : operators)
             {
@@ -221,7 +221,7 @@ namespace Parsing {
         }
 
     public:
-        Token(std::string value) : self(value)
+        explicit Token(const std::string& value) : self(value)
         {
             for (auto &it : self)
             {
@@ -230,12 +230,12 @@ namespace Parsing {
             }
         }
 
-        const std::string &string_val()
+        constexpr const std::string &string_val() const
         {
             return self;
         }
 
-        static bool is_valid_char(const char &c)
+        constexpr static bool is_valid_char(const char &c)
         {
             return is_numerical(c) ||
                    is_any_bracket(c) ||
@@ -243,12 +243,12 @@ namespace Parsing {
                    is_alpha(c);
         }
 
-        static bool is_alpha(const char &c)
+        constexpr static bool is_alpha(const char &c)
         {
             return (c <= 'z' && c >= 'a') || (c <= 'Z' && c >= 'A');
         }
 
-        bool is_numerical()
+        constexpr bool is_numerical() const
         {
             for (auto &it : self)
             {
@@ -258,12 +258,12 @@ namespace Parsing {
             return true;
         }
 
-        static bool is_numerical(const char &c)
+        constexpr static bool is_numerical(const char &c)
         {
             return (c <= '9' && c >= '0') || c == '.';
         }
 
-        bool is_operator()
+        constexpr bool is_operator() const
         {
             for (auto &op : operators)
             {
@@ -273,7 +273,7 @@ namespace Parsing {
             return false;
         }
 
-        const int op_precedence()
+        constexpr const int op_precedence() const
         {
             if (!is_operator())
                 return 0; // values have '0' precedence
@@ -296,7 +296,7 @@ namespace Parsing {
             return 0;
         }
 
-        bool is_binary_op()
+        constexpr bool is_binary_op() const
         {
             for (auto &op : basic_operators)
             {
@@ -306,68 +306,40 @@ namespace Parsing {
             return false;
         }
 
-        bool is_any_bracket()
+        constexpr bool is_any_bracket() const
         {
             return self == "(" || self == ")";
         }
 
-        bool is_r_bracket()
+        constexpr bool is_r_bracket() const
         {
             return self == ")";
         }
 
-        bool is_l_bracket()
+        constexpr bool is_l_bracket() const
         {
             return self == "(";
         }
 
-        bool is_variable()
+        constexpr bool is_variable() const
         {
             return is_alpha(self.back());
         }
 
-        bool is_unary_func()
+        constexpr bool is_unary_func() const
         {
             return is_operator() && !is_binary_op();
         }
 
-        bool right_associate()
+        constexpr bool right_associate() const
         {
             return self == "^";
         }
 
-        Token &operator=(Token &a)
+        Token &operator=(const Token &a)
         {
             this->self = a.self;
             return *this;
-        }
-
-        operator int()
-        {
-            if (!is_numerical())
-                throw std::bad_function_call();
-            return std::stoi(self);
-        }
-
-        operator float()
-        {
-            if (!is_numerical())
-                throw std::bad_function_call();
-            return std::stof(self);
-        }
-
-        operator double()
-        {
-            if (!is_numerical())
-                throw std::bad_function_call();
-            return std::stod(self);
-        }
-
-        operator long double()
-        {
-            if (!is_numerical())
-                throw std::bad_function_call();
-            return std::stold(self);
         }
 
         template <typename T>
@@ -430,7 +402,7 @@ namespace Parsing {
                     else
                     {
                         temp.push_back(*it++);
-                        out.push_back(Token(temp));
+                        out.emplace_back(temp);
                         temp.erase();
                     }
                 }
@@ -438,7 +410,7 @@ namespace Parsing {
                 else if (is_basic_operator(*it))
                 {
                     temp.push_back(*it++);
-                    out.push_back(temp);
+                    out.emplace_back(temp);
                     temp.erase();
                 }
 
@@ -447,7 +419,7 @@ namespace Parsing {
                     if (it == expression.end() || !is_alpha(*(it + 1))) // if variable
                     {
                         temp.push_back(*it++);
-                        out.push_back(temp);
+                        out.emplace_back(temp);
                         temp.erase();
                     }
                     else
