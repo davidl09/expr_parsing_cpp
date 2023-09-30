@@ -454,7 +454,7 @@ namespace Parsing {
         std::vector<Token> queue, output;
 
     public:
-        auto convert_to_rpn(std::vector<Token> &expression)
+        constexpr auto convert_to_rpn(std::vector<Token> &expression)
         {
             output.reserve(expression.size());
             queue.reserve(expression.size() / 2);
@@ -484,7 +484,7 @@ namespace Parsing {
                 else if (i->is_operator())
                 {
                     while (
-                        queue.size() > 0 &&
+                        !queue.empty() &&
                         ((i->right_associate() && (i->op_precedence() < queue.back().op_precedence())) ||
                          (!i->right_associate() && (i->op_precedence() <= queue.back().op_precedence()))
                         )
@@ -501,7 +501,7 @@ namespace Parsing {
                 }
             }
 
-            while (queue.size() > 0)
+            while (!queue.empty())
             {
                 output.push_back(queue.back());
                 queue.pop_back();
@@ -523,7 +523,7 @@ namespace Parsing {
         Expression(std::string expr)
         {
             variables = "";
-            self = Token::tokenize(expr);
+            self = Token::tokenize(std::move(expr));
             self_rpn = ParsingShunt().convert_to_rpn(self);
 
             for (auto &t : self) // add variables to list
@@ -573,19 +573,19 @@ namespace Parsing {
                 {
                     if(it->is_unary_func())
                     {
-                        if(!(retval.size() > 0)) throw std::invalid_argument("Malformed expression");
+                        if(retval.empty()) throw std::invalid_argument("Malformed expression");
                         retval.back() = it->function_eval(retval.back());
                     }
                     else
                     {
-                        if(!(retval.size() > 1)) throw std::invalid_argument("Malformed expression");
+                        if(retval.size() <= 1) throw std::invalid_argument("Malformed expression");
                         retval[retval.size() - 2] = it->function_eval(retval[retval.size() - 2], retval.back());
                         retval.pop_back();
                     }
                 }
                 ++it;
             }
-            if (!(retval.size() == 1)) throw std::invalid_argument("Extra operator, malformed expression");
+            if (retval.size() != 1) throw std::invalid_argument("Extra operator, malformed expression");
             return retval.back();
         }
 
