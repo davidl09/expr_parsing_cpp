@@ -191,7 +191,7 @@ namespace Parsing {
             return b == 0;
         }
 
-        constexpr static bool is_basic_operator(const char &self)
+         static bool is_basic_operator(const char &self)
         {
             for (auto &op : basic_operators)
             {
@@ -201,7 +201,7 @@ namespace Parsing {
             return false;
         }
 
-        constexpr static bool is_basic_operator(std::string &self)
+         static bool is_basic_operator(std::string &self)
         {
             for (auto &op : basic_operators)
             {
@@ -211,7 +211,7 @@ namespace Parsing {
             return false;
         }
 
-        constexpr static bool is_operator(std::string &self)
+         static bool is_operator(std::string &self)
         {
             for (auto &op : operators)
             {
@@ -222,7 +222,7 @@ namespace Parsing {
         }
 
     public:
-        explicit constexpr Token(std::string  value) : self(std::move(value))
+        explicit Token(std::string  value) : self(std::move(value))
         {
             for (auto &it : self)
             {
@@ -264,7 +264,7 @@ namespace Parsing {
             return (c <= '9' && c >= '0') || c == '.';
         }
 
-        [[nodiscard]] constexpr bool is_operator() const
+        [[nodiscard]] bool is_operator() const
         {
             for (auto &op : operators)
             {
@@ -297,7 +297,7 @@ namespace Parsing {
             return 0;
         }
 
-        [[nodiscard]] constexpr bool is_binary_op() const
+        [[nodiscard]] bool is_binary_op() const
         {
             for (auto &op : basic_operators)
             {
@@ -455,7 +455,7 @@ namespace Parsing {
         std::vector<Token> queue, output;
 
     public:
-        constexpr auto convert_to_rpn(std::vector<Token> &expression)
+        auto convert_to_rpn(const std::vector<Token> &expression)
         {
             output.reserve(expression.size());
             queue.reserve(expression.size() / 2);
