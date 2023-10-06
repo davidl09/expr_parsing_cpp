@@ -264,7 +264,7 @@ namespace Parsing {
             return (c <= '9' && c >= '0') || c == '.';
         }
 
-        [[nodiscard]] bool is_operator() const
+        [[nodiscard]] constexpr bool is_operator() const
         {
             for (auto &op : operators)
             {
@@ -566,7 +566,7 @@ namespace Parsing {
                         bool unary_minus = (it->string_val()[0] == '-');
                         retval.push_back(
                             (T)(unary_minus ? -1 : 1) * (vars[it->string_val().back()])
-                        ); //added support for unary minus
+                        );
                     }
                     else retval.push_back(convert_to<T>(it->string_val())); //may not work with custom types
                 }
