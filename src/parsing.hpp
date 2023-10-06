@@ -13,6 +13,7 @@
 #include <complex>
 #include <iostream>
 #include <unordered_map>
+#include <execution>
 
 
 
@@ -161,7 +162,7 @@ namespace Parsing {
     class Token
     {
     private:
-        std::string self;
+        const std::string self;
 
         constexpr static bool is_any_bracket(const char &self)
         {
@@ -178,51 +179,43 @@ namespace Parsing {
             return self == '(';
         }
 
-        constexpr static bool matched_brackets(const std::string& expr)
+        static bool matched_brackets(const std::string& expr)
         {
             int b = 0;
-            for (auto &c : expr)
-            {
+            std::for_each(std::execution::par_unseq, expr.begin(), expr.end(), [&](const auto& c) {
                 if (c == '(')
                     ++b;
                 if (c == ')')
                     --b;
-            }
+            });
             return b == 0;
         }
 
-         static bool is_basic_operator(const char &self)
+         constexpr static bool is_basic_operator(const char &self)
         {
-            for (auto &op : basic_operators)
-            {
+            return std::ranges::any_of(basic_operators, [&](const auto& op) {
                 if (self == op[0])
                     return true;
-            }
-            return false;
+                return false;
+            });
         }
 
-         static bool is_basic_operator(std::string &self)
+         constexpr static bool is_basic_operator(const std::string &self)
         {
-            for (auto &op : basic_operators)
-            {
-                if (self == op)
-                    return true;
-            }
-            return false;
+            return std::ranges::any_of(basic_operators, [&](const auto& op) {
+                return self == op;
+            });
         }
 
-         static bool is_operator(std::string &self)
+         constexpr static bool is_operator(const std::string &self)
         {
-            for (auto &op : operators)
-            {
-                if (self == op)
-                    return true;
-            }
-            return false;
+            return std::ranges::any_of(operators, [&](const auto& op){
+                return self == op;
+            });
         }
 
     public:
-        explicit Token(std::string  value) : self(std::move(value))
+        explicit Token(std::string value) : self(std::move(value))
         {
             for (auto &it : self)
             {
@@ -251,12 +244,9 @@ namespace Parsing {
 
         [[nodiscard]] constexpr bool is_numerical() const
         {
-            for (auto &it : self)
-            {
-                if ((it > '9' || it < '0') && it != '.')
-                    return false;
-            }
-            return true;
+            return std::ranges::none_of(self, [&](const auto& it) {
+                return !((it > '9' || it < '0') && it != '.');
+            });
         }
 
         constexpr static bool is_numerical(const char &c)
@@ -264,14 +254,14 @@ namespace Parsing {
             return (c <= '9' && c >= '0') || c == '.';
         }
 
-        [[nodiscard]] bool is_operator() const
+        [[nodiscard]] constexpr bool is_operator() const
         {
-            for (auto &op : operators)
-            {
-                if (self == op)
-                    return true;
-            }
-            return false;
+            return std::ranges::any_of(
+                    operators,
+                    [&](const auto& op){
+                        return self == op;
+                    }
+                    );
         }
 
         [[nodiscard]] constexpr int op_precedence() const
@@ -297,14 +287,12 @@ namespace Parsing {
             return 0;
         }
 
-        [[nodiscard]] bool is_binary_op() const
+        [[nodiscard]] constexpr bool is_binary_op() const
         {
-            for (auto &op : basic_operators)
-            {
-                if (self == op)
-                    return true;
-            }
-            return false;
+            return std::ranges::any_of(basic_operators,
+                                       [&](const auto& op) {
+                return op == self;
+            });
         }
 
         [[nodiscard]] constexpr bool is_any_bracket() const
@@ -337,11 +325,7 @@ namespace Parsing {
             return self == "^";
         }
 
-        Token &operator=(const Token &a)
-        {
-            this->self = a.self;
-            return *this;
-        }
+        Token &operator=(const Token &a) = default;
 
         template <typename T>
         T function_eval(T input)//deleted &
@@ -358,7 +342,7 @@ namespace Parsing {
             throw std::invalid_argument("Unknown operator token");
         }
 
-        static std::vector<Token> tokenize(std::string expression)
+        static std::vector<Token> tokenize(const std::string& expression)
         {
             if (!matched_brackets(expression))
                 throw std::invalid_argument("Mismatched parentheses\n");
@@ -521,10 +505,10 @@ namespace Parsing {
         std::string variables;
 
     public:
-        Expression(std::string expr)
+        explicit Expression(const std::string& expr)
         {
             variables = "";
-            self = Token::tokenize(std::move(expr));
+            self = Token::tokenize(expr);
             self_rpn = ParsingShunt().convert_to_rpn(self);
 
             for (auto &t : self) // add variables to list
@@ -548,10 +532,11 @@ namespace Parsing {
         {
             // Doesn't work unless you have complex type 'T' (i.e. cannot cast {0,1} to int for example)
             //if(is_complex<T>()) vars['i'] = {0,1}; //need to fix this or manually add 'i' to variable value list
-            for(const auto& v : variables)
-            {
-                if(vars.find(v) == vars.end()) throw std::invalid_argument("Missing variable value\n");
-            }
+
+            if(std::ranges::any_of(variables, [&](const auto& v) {
+                return vars.find(v) == vars.end();
+            })) throw std::invalid_argument("Missing variable value\n");
+
             
             std::vector<T> retval;
 
@@ -563,7 +548,7 @@ namespace Parsing {
                 {
                     if(it->is_variable())
                     {
-                        bool unary_minus = (it->string_val()[0] == '-');
+                        const bool unary_minus = (it->string_val()[0] == '-');
                         retval.push_back(
                             (T)(unary_minus ? -1 : 1) * (vars[it->string_val().back()])
                         ); //added support for unary minus
@@ -590,11 +575,11 @@ namespace Parsing {
             return retval.back();
         }
 
-        bool validate(std::unordered_map<char, T> variables)
+        bool validate(std::unordered_map<char, T> vars)
         {
             try
             {
-                evaluate(variables);
+                evaluate(vars);
             }
             catch(std::invalid_argument& e)
             {
@@ -603,9 +588,9 @@ namespace Parsing {
             return true;
         }
 
-        void validate_with_except(std::unordered_map<char, T> variables)
+        void validate_with_except(std::unordered_map<char, T> vars)
         {
-            evaluate(variables);
+            evaluate(vars);
         }
     };
 
