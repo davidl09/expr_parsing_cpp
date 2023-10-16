@@ -353,9 +353,9 @@ namespace Parsing {
             while (it != expression.end())
             {
 
-                if(*it < 33) 
+                if (*it < 33)
                     ++it;
-                    
+
                 else if (is_r_bracket(*it))
                 {
                     temp.push_back(*it);
@@ -380,7 +380,7 @@ namespace Parsing {
                 {
                     if (it == expression.begin() || is_l_bracket(*(it - 1)) || is_basic_operator(*(it - 1))) // unary minus
                     {
-                        if(!is_numerical(*(it + 1)) && !is_alpha(*(it + 1))) throw std::invalid_argument("Malformed expression");
+                        if (!is_numerical(*(it + 1)) && !is_alpha(*(it + 1))) throw std::invalid_argument("Malformed expression");
                         temp.push_back(*it++);
                     }
                     else
@@ -400,7 +400,7 @@ namespace Parsing {
 
                 else if (is_alpha(*it))
                 {
-                    if (it == expression.end() || !is_alpha(*(it + 1))) // if variable
+                    if (it == expression.end() || (it + 1) == expression.end() || !is_alpha(*(it + 1))) // if variable
                     {
                         temp.push_back(*it++);
                         out.emplace_back(temp);
