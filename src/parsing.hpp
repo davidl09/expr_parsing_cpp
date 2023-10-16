@@ -76,7 +76,7 @@ namespace Parsing::Math {
 
 namespace Parsing {
 
-    const static std::vector<std::string> operators = //duplicate of unordered_map below, needs to be integrated
+    constexpr static std::array<std::string, 24> operators //duplicate of unordered_map below, needs to be integrated
     {
         "+",
         "-",
@@ -106,7 +106,7 @@ namespace Parsing {
     };
 
     template<typename T>
-    static std::unordered_map<std::string, std::function<T(T)>> unary_funcs(
+    static std::unordered_map<std::string, std::function<T(T)>> unary_funcs
         {
             {"sqrt(", [](T input){return static_cast<T>(std::sqrt(static_cast<T>(input)));}},
             {"exp(", [](T input){return static_cast<T>(std::exp(static_cast<T>(input)));}},
@@ -124,23 +124,21 @@ namespace Parsing {
             {"log2(", [](T input){return static_cast<T>(std::log(static_cast<T>(input)) / std::log(2));}},
             {"abs(", [](T input){return static_cast<T>(std::abs(static_cast<T>(input)));}},
             {"zeta(", [](T input){return static_cast<T>(Math::zeta(static_cast<std::complex<long double>>(input)));}}
-        }
-    );
+        };
 
     //ln(Γ(x))=12ln(2π)+(x−12)ln(x)−x+x2ln(xsinh(1x)+1810x6)
 
     template<typename T>
-    static std::unordered_map<std::string, std::function<T(T,T)>> binary_ops(
+    static std::unordered_map<std::string, std::function<T(T,T)>> binary_ops
         {
             {"+", [](T left, T right){return left + right;}},
             {"-", [](T left, T right){return left - right;}},
             {"*", [](T left, T right){return left * right;}},
             {"/", [](T left, T right){return left / right;}},
             {"^", [](T left, T right){return static_cast<T>(std::pow(static_cast<T>(left), static_cast<T>(right)));}},
-        }
-    );
+        };
 
-    const static std::vector<std::string> basic_operators =
+    constexpr static std::array<std::string, 6> basic_operators
     {
         "+",
         "-",
@@ -182,13 +180,14 @@ namespace Parsing {
         static bool matched_brackets(const std::string& expr)
         {
             int b = 0;
-            std::for_each(std::execution::par_unseq, expr.begin(), expr.end(), [&](const auto& c) {
+            std::for_each(std::execution::par_unseq, expr.begin(), expr.end(), [&b](const auto& c) {
                 if (c == '(')
                     ++b;
                 if (c == ')')
                     --b;
             });
             return b == 0;
+
         }
 
          constexpr static bool is_basic_operator(const char &self)
